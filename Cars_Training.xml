@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+chan park, unpark, move, end_of_street, continue_on_street;
+
+bool first_car_parked = false;
+bool second_car_parked = false;</declaration>
+	<template>
+		<name>Lane</name>
+		<declaration>int street_length = 0;</declaration>
+		<location id="id0" x="42" y="-153">
+			<name x="32" y="-187">find_parking_spot_two</name>
+		</location>
+		<location id="id1" x="-603" y="-153">
+			<name x="-613" y="-187">start_beginning</name>
+		</location>
+		<location id="id2" x="-391" y="-153">
+			<name x="-459" y="-195">find_parking_spot_one</name>
+		</location>
+		<location id="id3" x="-391" y="-425">
+			<name x="-401" y="-459">parking_spot_one</name>
+		</location>
+		<location id="id4" x="-144" y="-153">
+			<name x="-170" y="-144">continue</name>
+		</location>
+		<location id="id5" x="34" y="-399">
+			<name x="24" y="-433">parking_spot_two</name>
+		</location>
+		<location id="id6" x="289" y="-153">
+			<name x="279" y="-187">street_continue</name>
+		</location>
+		<location id="id7" x="476" y="-153">
+			<name x="466" y="-187">street_end</name>
+		</location>
+		<init ref="id1"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="348" y="-144">end_of_street?</label>
+			<label kind="assignment" x="357" y="-127">street_length++</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="guard" x="102" y="-365">second_car_parked == true</label>
+			<label kind="synchronisation" x="136" y="-348">unpark?</label>
+			<label kind="assignment" x="136" y="-331">second_car_parked = false,
+street_length++</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id6"/>
+			<label kind="guard" x="76" y="-144">second_car_parked == true</label>
+			<label kind="assignment" x="93" y="-119">street_length++</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-136" y="-297">second_car_parked == false</label>
+			<label kind="synchronisation" x="-119" y="-280">park?</label>
+			<label kind="assignment" x="-127" y="-255">second_car_parked = true</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-126" y="-170">continue_on_street?</label>
+			<label kind="assignment" x="-93" y="-153">street_length++</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-306" y="-391">first_car_parked == true</label>
+			<label kind="synchronisation" x="-289" y="-365">unpark?</label>
+			<label kind="assignment" x="-280" y="-340">first_car_parked = false,
+street_length++</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-552" y="-323">first_car_parked == false</label>
+			<label kind="synchronisation" x="-552" y="-297">park?</label>
+			<label kind="assignment" x="-552" y="-263">first_car_parked = true</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-340" y="-144">first_car_parked == true</label>
+			<label kind="assignment" x="-323" y="-127">street_length++</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-552" y="-119">move?</label>
+			<label kind="assignment" x="-585" y="-153">street_length++</label>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Car</name>
+		<declaration>// Place local declarations here.
+clock wait;
+int position = 0;
+bool parked = false;
+</declaration>
+		<location id="id8" x="-263" y="-42">
+			<name x="-273" y="-76">start</name>
+		</location>
+		<location id="id9" x="0" y="-42">
+			<name x="-17" y="-84">find_parking_spot</name>
+		</location>
+		<location id="id10" x="348" y="-42">
+			<name x="338" y="-76">perform_parking</name>
+		</location>
+		<location id="id11" x="-127" y="119">
+			<name x="-137" y="85">exit_street</name>
+		</location>
+		<init ref="id8"/>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-109" y="21">end_of_street!</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="guard" x="102" y="42">wait &gt; 5</label>
+			<label kind="synchronisation" x="127" y="68">unpark!</label>
+			<label kind="assignment" x="136" y="93">parked = false</label>
+			<nail x="348" y="187"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="153" y="-68">park!</label>
+			<label kind="assignment" x="136" y="-34">position++,
+parked = true,
+wait = 0</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-170" y="-229">first_car_parked == false || second_car_parked == false</label>
+			<label kind="synchronisation" x="-76" y="-203">continue_on_street!</label>
+			<label kind="assignment" x="-42" y="-178">position++</label>
+			<nail x="110" y="-187"/>
+			<nail x="-127" y="-186"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-144" y="-68">move!</label>
+			<label kind="assignment" x="-135" y="-42">position++</label>
+		</transition>
+	</template>
+	<system>carOne = Car ();
+carTwo = Car ();
+//carThree= Car();
+rLane = Lane();
+lLane = Lane();
+system carOne, carTwo,rLane, lLane;</system>
+	<queries>
+		<query>
+			<formula>A[]((carOne.position == 2 and carOne.parked == true)imply((carTwo.position != 2 or carTwo.parked == false) or (carTwo.position != 2 and carTwo.parked == true))or (carTwo.position == 2 and carTwo.parked == false))</formula>
+			<comment>only one car can park in the first parking space at a time</comment>
+		</query>
+		<query>
+			<formula>A[](deadlock imply (rLane.street_end and lLane.street_end))</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
